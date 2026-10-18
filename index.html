@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>중대 현황</title>
+<meta name="description" content="휴가·외출·상벌점 현황관리">
+<meta name="theme-color" content="#2f5d43">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon.png">
+<!-- 아이폰 홈 화면용 -->
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="중대 현황">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+  html,body{margin:0;height:100%;background:#2f5d43;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+  #app{position:fixed;inset:0;width:100%;height:100%;border:0;background:#f2f4f1;padding-top:env(safe-area-inset-top);box-sizing:border-box}
+  body.standalone #app{background:#2f5d43}
+
+  /* 시작 화면 */
+  #splash{position:fixed;inset:0;z-index:5;background:#2f5d43;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;transition:opacity .35s}
+  #splash img{width:96px;height:96px;border-radius:22px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+  #splash b{margin-top:18px;font-size:20px;letter-spacing:-.3px}
+  #splash span{margin-top:6px;font-size:13px;opacity:.75}
+  #splash.hide{opacity:0;pointer-events:none}
+  #splash .dots{display:flex;gap:6px;margin-top:26px}
+  #splash .dots i{width:7px;height:7px;border-radius:50%;background:#fff;opacity:.3;animation:d 1s infinite}
+  #splash .dots i:nth-child(2){animation-delay:.15s}#splash .dots i:nth-child(3){animation-delay:.3s}
+  @keyframes d{50%{opacity:1}}
+
+  /* 설치 안내 (브라우저로 열었을 때만) */
+  #install{position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:6;max-width:500px;margin:0 auto;background:#fff;border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.25);padding:16px;display:none;color:#1b211d}
+  #install.show{display:block;animation:up .25s ease-out}
+  @keyframes up{from{transform:translateY(30px);opacity:0}}
+  #install .h{display:flex;gap:12px;align-items:center}
+  #install img{width:48px;height:48px;border-radius:12px}
+  #install .h b{display:block;font-size:16px}
+  #install small{color:#68726c;font-size:13px}
+  #install .steps{margin:12px 0 0;padding:12px 14px;background:#f2f4f1;border-radius:12px;font-size:14px;line-height:1.7}
+  #install .btns{display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-top:12px}
+  #install button{min-height:48px;border:0;border-radius:12px;font:inherit;font-size:15px;font-weight:700;background:#f2f4f1;color:#1b211d}
+  #install button.go{background:#2f5d43;color:#fff}
+  .share-ic{display:inline-block;width:18px;height:18px;vertical-align:-3px}
+
+  #offline{position:fixed;inset:0;z-index:7;background:#f2f4f1;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;color:#1b211d}
+  #offline.show{display:flex}
+  #offline button{margin-top:18px;min-height:48px;padding:0 28px;border:0;border-radius:12px;background:#2f5d43;color:#fff;font:inherit;font-weight:700}
+</style>
+</head>
+<body>
+
+<div id="splash">
+  <img src="icons/icon-192.png" alt="">
+  <b>중대 현황</b>
+  <span>휴가 · 외출 · 상벌점</span>
+  <div class="dots"><i></i><i></i><i></i></div>
+</div>
+
+<iframe id="app" title="중대 현황" allow="clipboard-write"></iframe>
+
+<div id="install">
+  <div class="h">
+    <img src="icons/icon-192.png" alt="">
+    <div><b>홈 화면에 앱 설치</b><small>다음부터 아이콘을 눌러 바로 여세요</small></div>
+  </div>
+  <div class="steps" id="ios-steps" hidden>
+    ① 화면 아래 <b>공유</b> 버튼
+    <svg class="share-ic" viewBox="0 0 24 24" fill="none" stroke="#2d6fa8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg> 누르기<br>
+    ② <b>홈 화면에 추가</b> 선택<br>
+    ③ 오른쪽 위 <b>추가</b> 누르기
+  </div>
+  <div class="steps" id="and-steps" hidden>
+    오른쪽 위 <b>⋮</b> 메뉴 → <b>홈 화면에 추가</b> 또는 <b>앱 설치</b>를 누르세요.
+  </div>
+  <div class="btns">
+    <button onclick="hideInstall(true)">나중에</button>
+    <button class="go" id="btn-install" onclick="doInstall()">설치하기</button>
+  </div>
+</div>
+
+<div id="offline">
+  <b style="font-size:18px">인터넷에 연결되어 있지 않습니다</b>
+  <p style="color:#68726c">연결을 확인한 뒤 다시 시도하세요.</p>
+  <button onclick="location.reload()">다시 시도</button>
+</div>
+
+<script>
+/* ▼▼▼ 여기에 Apps Script 웹 앱 배포 URL(/exec로 끝나는 주소)을 붙여넣으세요 ▼▼▼ */
+const APP_URL = 'https://script.google.com/macros/s/AKfycbzBuSijROSIuDgd57ZzLdaUlgvvwaA5mYvvBRQiOtL489owCzP3MUKnJMSnpj79M7Mm/exec';
+/* ▲▲▲ ---------------------------------------------------------------- ▲▲▲ */
+
+const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const ua = navigator.userAgent;
+const isIOS = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isKakao = /KAKAOTALK/i.test(ua);
+if (standalone) document.body.classList.add('standalone');
+
+/* 카카오톡 인앱 브라우저로 열면 설치가 안 되므로 외부 브라우저로 넘김 */
+if (isKakao && !standalone){
+  if (/Android/i.test(ua)) location.href = 'intent://' + location.href.replace(/^https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;end';
+  else location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(location.href);
+}
+
+/* 앱 불러오기 */
+const frame = document.getElementById('app');
+const splash = document.getElementById('splash');
+if (!navigator.onLine) document.getElementById('offline').classList.add('show');
+frame.addEventListener('load', () => setTimeout(() => splash.classList.add('hide'), 250));
+setTimeout(() => splash.classList.add('hide'), 8000);   // 느린 회선 대비
+frame.src = APP_URL;
+window.addEventListener('online', () => document.getElementById('offline').classList.remove('show'));
+window.addEventListener('offline', () => document.getElementById('offline').classList.add('show'));
+
+/* 서비스 워커 (설치 가능 조건 + 오프라인 안내) */
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+
+/* 설치 안내 */
+let deferred = null;
+const box = document.getElementById('install');
+function dismissed(){ try{ return Date.now() - Number(localStorage.getItem('installDismissed') || 0) < 3 * 864e5; }catch(e){ return false; } }
+function showInstall(){ if (!standalone && !dismissed()) setTimeout(() => box.classList.add('show'), 1800); }
+function hideInstall(remember){
+  box.classList.remove('show');
+  if (remember){ try{ localStorage.setItem('installDismissed', String(Date.now())); }catch(e){} }
+}
+window.addEventListener('beforeinstallprompt', e => {     // 안드로이드 크롬·삼성인터넷
+  e.preventDefault(); deferred = e; showInstall();
+});
+if (isIOS && !standalone){                               // 아이폰은 수동 안내
+  document.getElementById('ios-steps').hidden = false;
+  document.getElementById('btn-install').textContent = '확인';
+  showInstall();
+} else if (!standalone){
+  setTimeout(() => {                                      // 설치 이벤트가 안 오는 브라우저는 메뉴 안내
+    if (!deferred){ document.getElementById('and-steps').hidden = false; document.getElementById('btn-install').textContent = '확인'; showInstall(); }
+  }, 3500);
+}
+function doInstall(){
+  if (deferred){
+    deferred.prompt();
+    deferred.userChoice.finally(() => { deferred = null; hideInstall(false); });
+  } else hideInstall(true);
+}
+window.addEventListener('appinstalled', () => hideInstall(false));
+</script>
+</body>
+</html>
