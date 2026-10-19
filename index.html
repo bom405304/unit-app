@@ -6,6 +6,16 @@
 <title>광개토 ON</title>
 <meta name="description" content="광개토 ON — 휴가·외출·상벌점·소통">
 <meta name="theme-color" content="#1e4a33">
+<!-- 카톡·문자 링크 미리보기 -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="광개토 ON">
+<meta property="og:title" content="광개토 ON">
+<meta property="og:description" content="출타·상벌점·소통을 한 번에. 눌러서 설치하세요.">
+<meta property="og:url" content="https://bom405304.github.io/unit-app/">
+<meta property="og:image" content="https://bom405304.github.io/unit-app/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/favicon.png">
 <!-- 아이폰 홈 화면용 -->
@@ -54,6 +64,15 @@
   #pushsheet button{min-height:52px;border:0;border-radius:12px;font:inherit;font-size:16px;font-weight:700;background:#f2f4f1;color:#1b211d}
   #pushsheet button.go{background:#1e4a33;color:#fff}
 
+  #kakao{position:fixed;inset:0;z-index:9;background:#1e4a33;color:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+  #kakao.show{display:flex}
+  #kakao img{width:84px;height:84px;border-radius:20px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+  #kakao h2{margin:20px 0 8px;font-size:21px}
+  #kakao p{margin:0 0 24px;font-size:15px;line-height:1.55;opacity:.85}
+  #kakao .b{display:block;width:100%;max-width:320px;min-height:54px;margin:0 auto 10px;border:0;border-radius:14px;font:inherit;font-size:16px;font-weight:700;background:#ffcc4d;color:#1b211d}
+  #kakao .b.s{background:rgba(255,255,255,.14);color:#fff}
+  #kakao .lk{margin-top:10px;background:none;border:0;color:#fff;opacity:.6;font:inherit;font-size:14px;text-decoration:underline}
+
   #offline{position:fixed;inset:0;z-index:7;background:#f2f4f1;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;color:#1b211d}
   #offline.show{display:flex}
   #offline button{margin-top:18px;min-height:48px;padding:0 28px;border:0;border-radius:12px;background:#1e4a33;color:#fff;font:inherit;font-weight:700}
@@ -99,6 +118,16 @@
   </div>
 </div>
 
+<div id="kakao">
+  <img src="icons/icon-192.png" alt="">
+  <h2>카카오톡에서는 설치가 안 돼요</h2>
+  <p>아래 버튼으로 <b id="kk-br">크롬</b>에서 열면<br>광개토 ON을 홈 화면에 설치할 수 있어요.</p>
+  <button class="b" onclick="openExternal()">⬆ <span id="kk-br2">크롬</span>으로 열기</button>
+  <button class="b s" id="kk-intent" onclick="openIntent()" hidden>다른 브라우저 고르기</button>
+  <button class="b s" onclick="copyLink(this)">링크 복사하기</button>
+  <button class="lk" onclick="document.getElementById('kakao').classList.remove('show')">설치 없이 카톡에서 그냥 쓰기</button>
+</div>
+
 <div id="offline">
   <b style="font-size:18px">인터넷에 연결되어 있지 않습니다</b>
   <p style="color:#68726c">연결을 확인한 뒤 다시 시도하세요.</p>
@@ -119,10 +148,22 @@ const isIOS = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === 'MacIntel'
 const isKakao = /KAKAOTALK/i.test(ua);
 if (standalone) document.body.classList.add('standalone');
 
-/* 카카오톡 인앱 브라우저로 열면 설치가 안 되므로 외부 브라우저로 넘김 */
+/* 카카오톡 인앱 브라우저는 설치를 지원하지 않음 → 외부 브라우저로 넘기고, 안 넘어가면 안내 화면 */
+const isAndroid = /Android/i.test(ua);
+function openExternal(){ location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(location.href); }
+function openIntent(){ location.href = 'intent://' + location.href.replace(/^https?:\/\//, '') + '#Intent;scheme=https;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;end'; }
+function copyLink(btn){
+  const u = location.href;
+  const done = () => { btn.textContent = '복사됨 ✓  크롬 주소창에 붙여넣으세요'; };
+  if (navigator.clipboard) navigator.clipboard.writeText(u).then(done, () => prompt('이 주소를 복사하세요', u));
+  else prompt('이 주소를 복사하세요', u);
+}
 if (isKakao && !standalone){
-  if (/Android/i.test(ua)) location.href = 'intent://' + location.href.replace(/^https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;end';
-  else location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(location.href);
+  const br = isIOS ? '사파리' : '크롬';
+  document.getElementById('kk-br').textContent = br; document.getElementById('kk-br2').textContent = br;
+  if (isAndroid) document.getElementById('kk-intent').hidden = false;
+  document.getElementById('kakao').classList.add('show');
+  setTimeout(openExternal, 300);   // 대부분 여기서 자동으로 넘어감
 }
 
 /* 앱 불러오기 */
@@ -202,11 +243,11 @@ function grantPush(){
 /* 설치 안내 */
 let deferred = null;
 const box = document.getElementById('install');
-function dismissed(){ try{ return Date.now() - Number(localStorage.getItem('installDismissed') || 0) < 3 * 864e5; }catch(e){ return false; } }
-function showInstall(){ if (!standalone && !dismissed()) setTimeout(() => box.classList.add('show'), 1800); }
+function dismissed(){ try{ return sessionStorage.getItem('installDismissed') === '1'; }catch(e){ return false; } }
+function showInstall(){ if (!standalone && !isKakao && !dismissed()) setTimeout(() => box.classList.add('show'), 1800); }
 function hideInstall(remember){
   box.classList.remove('show');
-  if (remember){ try{ localStorage.setItem('installDismissed', String(Date.now())); }catch(e){} }
+  if (remember){ try{ sessionStorage.setItem('installDismissed', '1'); }catch(e){} }
 }
 window.addEventListener('beforeinstallprompt', e => {     // 안드로이드 크롬·삼성인터넷
   e.preventDefault(); deferred = e; showInstall();
