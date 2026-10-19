@@ -1,18 +1,33 @@
 {
-  "name": "중대 현황 — 휴가·외출·상벌점",
-  "short_name": "중대 현황",
-  "description": "휴가·외출·외박 현황과 상벌점, 의견함",
+  "name": "광개토 ON — 출타·상벌점·소통",
+  "short_name": "광개토 ON",
+  "description": "휴가·외출·외박 현황, 상벌점, 의견 게시판",
   "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "lang": "ko",
-  "background_color": "#2f5d43",
-  "theme_color": "#2f5d43",
+  "background_color": "#1e4a33",
+  "theme_color": "#1e4a33",
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }
