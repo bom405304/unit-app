@@ -216,6 +216,10 @@ window.addEventListener('message', async e => {
   try{ host = new URL(e.origin).hostname; }catch(err){}
   if (!/\.googleusercontent\.com$/.test(host)) return;
   const reply = m => { try{ e.source.postMessage(Object.assign({ src:'unit-shell' }, m), '*'); }catch(err){} };
+  // 로그인 유지(30일): 앱 화면 저장소가 지워져도 껍데기에 보관한 값으로 자동 로그인
+  if (d.type === 'auth-save' && typeof d.token === 'string' && d.token.length < 2000){ try{ localStorage.setItem('gw_auth', d.token); }catch(err){} return; }
+  if (d.type === 'auth-clear'){ try{ localStorage.removeItem('gw_auth'); }catch(err){} return; }
+  if (d.type === 'auth-get'){ let t = null; try{ t = localStorage.getItem('gw_auth'); }catch(err){} return reply({ type:'auth', token:t }); }
   if (d.type === 'push-status'){
     const sup = pushSupport();
     let token = null;

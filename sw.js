@@ -1,6 +1,6 @@
 /* 앱 껍데기(아이콘·시작화면)만 저장 + 푸시 수신. 실제 데이터는 항상 구글 시트에서 새로 불러옴 */
-const CACHE = 'shell-v4';
-const FILES = ['./', 'index.html', 'config.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon.png'];
+const CACHE = 'shell-v5';
+const FILES = ['./', 'index.html', 'config.js', 'manifest.webmanifest', 'og.png', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon.png'];
 
 /* ---- 푸시 (Firebase) ---- */
 try {
